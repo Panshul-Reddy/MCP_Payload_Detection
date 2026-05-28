@@ -1,0 +1,15 @@
+Model: models/best_model.pkl
+Data: data/test_features.csv
+Accuracy: 1.0000
+F1-score: 1.0000
+Misclassified: 0 / 64
+
+Classification Report:
+              precision    recall  f1-score   support
+
+         mcp       1.00      1.00      1.00        26
+     non_mcp       1.00      1.00      1.00        38
+
+    accuracy                           1.00        64
+   macro avg       1.00      1.00      1.00        64
+weighted avg       1.00      1.00      1.00        64

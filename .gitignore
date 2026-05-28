@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+venv/
+
+# Generated data (large files)
+data/
+models/
+
+# Private key (never commit)
+certs/server.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

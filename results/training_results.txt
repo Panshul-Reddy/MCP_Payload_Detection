@@ -1,0 +1,14 @@
+Best Model: Random Forest
+Accuracy: 0.9630
+F1-score: 0.9625
+Samples: 134
+
+Classification Report:
+              precision    recall  f1-score   support
+
+         mcp       1.00      0.90      0.95        10
+     non_mcp       0.94      1.00      0.97        17
+
+    accuracy                           0.96        27
+   macro avg       0.97      0.95      0.96        27
+weighted avg       0.97      0.96      0.96        27
