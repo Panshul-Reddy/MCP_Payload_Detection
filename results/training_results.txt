@@ -1,14 +1,16 @@
-Best Model: Random Forest
-Accuracy: 0.9630
-F1-score: 0.9625
-Samples: 134
+Best Model: Logistic Regression
+CV F1:    1.0000
+Test Acc: 0.9840
+Test F1:  0.9838
+Samples:  623
+Features: 75
 
 Classification Report:
               precision    recall  f1-score   support
 
-         mcp       1.00      0.90      0.95        10
-     non_mcp       0.94      1.00      0.97        17
+         mcp       1.00      0.94      0.97        34
+     non_mcp       0.98      1.00      0.99        91
 
-    accuracy                           0.96        27
-   macro avg       0.97      0.95      0.96        27
-weighted avg       0.97      0.96      0.96        27
+    accuracy                           0.98       125
+   macro avg       0.99      0.97      0.98       125
+weighted avg       0.98      0.98      0.98       125

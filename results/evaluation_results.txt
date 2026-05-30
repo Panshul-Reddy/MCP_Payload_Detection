@@ -1,5 +1,5 @@
 Model: models/best_model.pkl
-Data: data/test_features.csv
+Data: data/test_features_v2.csv
 Accuracy: 1.0000
 F1-score: 1.0000
 Misclassified: 0 / 64

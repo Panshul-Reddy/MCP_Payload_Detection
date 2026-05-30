@@ -14,6 +14,7 @@ import argparse
 import asyncio
 import os
 import platform
+import random
 import signal
 import socket
 import struct
@@ -22,6 +23,20 @@ import sys
 import time
 
 from scapy.all import get_if_list
+
+
+def _find_free_port(start: int, end: int, exclude: set) -> int:
+    """Find a free TCP port in the given range, excluding specified ports."""
+    candidates = list(set(range(start, end)) - exclude)
+    random.shuffle(candidates)
+    for port in candidates:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(("localhost", port))
+                return port
+        except OSError:
+            continue
+    raise RuntimeError(f"No free port found in range {start}-{end}")
 
 
 # ---------------------------------------------------------------------------
@@ -176,21 +191,34 @@ def run_pipeline(
     tls: bool = False,
     cert: str = "certs/server.crt",
     key: str = "certs/server.key",
+    randomize_ports: bool = True,
 ) -> None:
     """Run the full traffic generation + capture pipeline."""
     os.makedirs(output_dir, exist_ok=True)
     interface = interface or _default_loopback_interface()
     py = _python_exe()
 
-    # Determine ports
-    if tls:
-        mcp_port = 8443
-        http_port = 5443
+    # Determine ports -- randomize to prevent port-based leakage
+    used_ports = set()
+    if randomize_ports:
+        mcp_port = _find_free_port(7000, 9500, used_ports)
+        used_ports.add(mcp_port)
+        http_port = _find_free_port(7000, 9500, used_ports)
+        used_ports.add(http_port)
+        ws_port = _find_free_port(7000, 9500, used_ports)
+        used_ports.add(ws_port)
+        tcp_port = _find_free_port(7000, 9500, used_ports)
+        used_ports.add(tcp_port)
+        print(f"[Orchestrator] Randomized ports: MCP={mcp_port}, HTTP={http_port}, WS={ws_port}, TCP={tcp_port}")
     else:
-        mcp_port = 8000
-        http_port = 5000
-    ws_port = 5001
-    tcp_port = 5002
+        if tls:
+            mcp_port = 8443
+            http_port = 5443
+        else:
+            mcp_port = 8000
+            http_port = 5000
+        ws_port = 5001
+        tcp_port = 5002
 
     procs = []
 
