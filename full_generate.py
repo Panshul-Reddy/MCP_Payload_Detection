@@ -151,6 +151,25 @@ def main():
     _run(cmd, "Training", timeout=120)
 
     # ---------------------------------------------------------------
+    # Check class balance
+    # ---------------------------------------------------------------
+    import pandas as pd
+    if os.path.exists(args.output):
+        df = pd.read_csv(args.output)
+        mcp_count = len(df[df.label == 'mcp'])
+        non_mcp_count = len(df[df.label == 'non_mcp'])
+        ratio = max(mcp_count, non_mcp_count) / max(min(mcp_count, non_mcp_count), 1)
+        print(f"\n  Class Balance:")
+        print(f"    MCP:     {mcp_count}")
+        print(f"    Non-MCP: {non_mcp_count}")
+        print(f"    Ratio:   1:{ratio:.1f}")
+        if ratio > 3.0:
+            print(f"    WARNING: Class imbalance ratio exceeds 3:1!")
+            print(f"    Consider generating more MCP traffic.")
+        else:
+            print(f"    OK: Ratio within acceptable range")
+
+    # ---------------------------------------------------------------
     # Summary
     # ---------------------------------------------------------------
     print(f"\n{'='*60}")

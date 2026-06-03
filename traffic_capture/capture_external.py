@@ -1,9 +1,9 @@
 """
-External Traffic Capture -- captures real-world HTTPS traffic on the main
+External Traffic Capture v2 -- captures real-world HTTPS traffic on the main
 network interface while the external HTTPS generator runs.
 
-This produces non_mcp pcap files from real TLS traffic to public APIs,
-giving the classifier realistic "hard negatives" to train on.
+Fixed: Uses Scapy's conf.iface as default (proven to work) instead of
+trying to auto-detect which often picks the wrong adapter on Windows.
 
 Usage:
     python -m traffic_capture.capture_external --requests 30 --duration 60 --output-dir data/pcap_external
@@ -11,39 +11,38 @@ Usage:
 
 import argparse
 import os
-import platform
 import subprocess
 import sys
-import threading
 import time
 
 from scapy.all import AsyncSniffer, TCP, wrpcap, conf, get_if_list, get_if_addr
 
 
 def _find_main_interface() -> str:
-    """Find the main (non-loopback) network interface."""
-    system = platform.system()
-    ifaces = get_if_list()
+    """Find the main network interface for external traffic capture."""
+    # Use Scapy's default interface (it picks the one with the default route)
+    default = str(conf.iface)
 
-    if system == "Windows":
-        # On Windows, find interface with a real IP (not loopback)
-        for iface in ifaces:
-            if "loopback" in iface.lower() or "NPF_Loopback" in iface:
-                continue
-            try:
-                addr = get_if_addr(iface)
-                if addr and addr != "0.0.0.0" and addr != "127.0.0.1":
-                    return iface
-            except Exception:
-                continue
-        # Fallback: try conf.iface
-        return str(conf.iface)
-    else:
-        # Linux/macOS
-        for candidate in ["eth0", "wlan0", "en0", "enp0s3"]:
-            if candidate in ifaces:
-                return candidate
-        return str(conf.iface)
+    # Verify it has a real IP
+    try:
+        addr = get_if_addr(default)
+        if addr and addr not in ("0.0.0.0", "127.0.0.1"):
+            return default
+    except Exception:
+        pass
+
+    # Fallback: find interface with a routable IP (192.168.x.x, 10.x.x.x, etc.)
+    for iface in get_if_list():
+        if "loopback" in iface.lower() or "NPF_Loopback" in iface:
+            continue
+        try:
+            addr = get_if_addr(iface)
+            if addr and addr.startswith(("192.168.", "10.", "172.")):
+                return iface
+        except Exception:
+            continue
+
+    return default
 
 
 def capture_external_traffic(
@@ -59,7 +58,14 @@ def capture_external_traffic(
     py = sys.executable
     interface = _find_main_interface()
 
+    # Show what we're capturing on
+    try:
+        addr = get_if_addr(interface)
+    except Exception:
+        addr = "unknown"
+
     print(f"[External Capture] Interface: {interface}")
+    print(f"[External Capture] Interface IP: {addr}")
     print(f"[External Capture] Requests: {num_requests}")
     print(f"[External Capture] Duration: {duration}s")
 
@@ -74,17 +80,27 @@ def capture_external_traffic(
     )
     sniffer.start()
 
-    # Longer delay for sniffer to fully initialize (round 1 failed with 1s)
+    # Wait for sniffer to fully initialize
     time.sleep(3)
 
-    # Pre-warm: make one request to trigger DNS + TLS setup before real capture
+    # Pre-warm: make one request to verify connectivity and warm DNS/TLS
     import requests as _req
     try:
-        _req.get("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
-        print("[External Capture] Pre-warm request succeeded")
+        r = _req.get("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
+        print(f"[External Capture] Pre-warm: status={r.status_code}")
+    except Exception as e:
+        print(f"[External Capture] Pre-warm failed: {e}")
+    time.sleep(2)
+
+    # Check if sniffer caught the pre-warm packets
+    # (This verifies the interface is correct)
+    try:
+        interim = sniffer.results if hasattr(sniffer, 'results') and sniffer.results else []
+        print(f"[External Capture] Pre-warm packets captured: {len(interim)}")
+        if len(interim) == 0:
+            print("[External Capture] WARNING: No pre-warm packets - interface may be wrong")
     except Exception:
-        print("[External Capture] Pre-warm request failed (continuing)")
-    time.sleep(1)
+        pass
 
     # Run external HTTPS generator as subprocess
     gen_proc = subprocess.Popen(

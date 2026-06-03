@@ -84,8 +84,9 @@ def run_external_https(num_requests: int = 30, delay_range: tuple = (0.2, 1.5)) 
         method = endpoint["method"]
 
         try:
-            # New session per request for connection diversity
+            # New session per request AND Connection: close -> separate TCP flow per request
             sess = requests.Session()
+            sess.headers["Connection"] = "close"
             sess.headers["User-Agent"] = random.choice([
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
                 "MCP-Traffic-Analyzer/1.0",

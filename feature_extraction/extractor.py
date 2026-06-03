@@ -245,6 +245,16 @@ def _extract_tls_features(packets: list) -> dict:
         "tls_record_size_entropy": round(_shannon_entropy(tls_record_sizes), 4),
     }
 
+    # Sanity check: If no handshake was seen but app_data was parsed,
+    # the records are likely false positives from encrypted payload bytes
+    if features["tls_handshake_count"] == 0 and features["tls_app_data_count"] > 0:
+        # Zero out all TLS features - can't trust the parsing
+        for key in features:
+            if isinstance(features[key], float):
+                features[key] = 0.0
+            else:
+                features[key] = 0
+
     return features
 
 

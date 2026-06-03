@@ -1,0 +1,19 @@
+Model: XGBoost
+Train flows: 609 from 28 sessions
+Val flows: 168 from 9 sessions
+Test flows: 248 from 11 sessions
+Train Acc: 1.0000
+Val F1: 0.9472
+Test Acc: 0.9798
+Test F1: 0.9799
+Train-Test Gap: +0.0202
+
+              precision    recall  f1-score   support
+
+         mcp       0.95      1.00      0.97        96
+     non_mcp       1.00      0.97      0.98       152
+
+    accuracy                           0.98       248
+   macro avg       0.98      0.98      0.98       248
+weighted avg       0.98      0.98      0.98       248
+
