@@ -257,7 +257,7 @@ Predict from feature CSV:
 5. Low performance in new environment
 	- Regenerate dataset with local traffic profile and retrain
 
-## Mentor/Reviewer Talking Points
+## Talking Points
 
 1. End-to-end reproducible pipeline
 	The project automates generation, capture, extraction, training, and prediction.
@@ -267,7 +267,3 @@ Predict from feature CSV:
 	Detection from first N packets enables near real-time MCP visibility.
 4. Diversity and scale
 	Multiple MCP server domains and bulk flow generation improve generalization.
-
-## License and Responsible Use
-
-This project is for research and defensive traffic classification. Ensure all traffic generation and capture is performed only in authorized environments.
