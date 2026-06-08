@@ -1,0 +1,14 @@
+EARLY PACKET CLASSIFICATION RESULTS
+Dataset: 6651 samples
+
+  N  Features    CV Acc     CV F1  Confidence
+---------------------------------------------
+  3        21    99.9%    99.9%      99.9%
+  5        28    99.9%    99.9%      99.9%
+  7        35    99.9%    99.9%      99.9%
+ 10        39    99.9%    99.9%      99.9%
+ 13        39    99.9%    99.9%      99.9%
+ 17        39    99.9%    99.9%      99.9%
+
+Sweet spot: N=3 (99.9% acc)
+Best: N=7 (99.9% acc)

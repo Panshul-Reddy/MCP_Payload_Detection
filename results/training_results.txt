@@ -1,16 +1,16 @@
 Best Model: XGBoost
-CV F1:    0.9990
-Test Acc: 0.9958
-Test F1:  0.9958
-Samples:  1199
+CV F1:    0.9994
+Test Acc: 1.0000
+Test F1:  1.0000
+Samples:  6651
 Features: 75
 
 Classification Report:
               precision    recall  f1-score   support
 
-         mcp       1.00      0.99      0.99        74
-     non_mcp       0.99      1.00      1.00       166
+         mcp       1.00      1.00      1.00       675
+     non_mcp       1.00      1.00      1.00       656
 
-    accuracy                           1.00       240
-   macro avg       1.00      0.99      1.00       240
-weighted avg       1.00      1.00      1.00       240
+    accuracy                           1.00      1331
+   macro avg       1.00      1.00      1.00      1331
+weighted avg       1.00      1.00      1.00      1331

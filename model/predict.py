@@ -99,9 +99,18 @@ def predict_from_features(model, df: pd.DataFrame) -> pd.DataFrame:
         if col in df.columns:
             id_cols[col] = df[col].values
 
-    # Prepare feature matrix
+    # Prepare feature matrix — use model's feature order if available
     feature_cols = [c for c in df.columns if c not in DROP_COLS]
     X = df[feature_cols].fillna(0).replace([np.inf, -np.inf], 0)
+
+    # Reorder columns to match model training order
+    if hasattr(model, "feature_names_in_"):
+        expected = list(model.feature_names_in_)
+        # Add missing columns as 0, drop extra columns
+        for col in expected:
+            if col not in X.columns:
+                X[col] = 0
+        X = X[expected]
 
     # Predict
     predictions = model.predict(X)
